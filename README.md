@@ -1,6 +1,3 @@
-Parfait ! Pour que ton README soit bien compatible avec GitHub et affiche un rendu correct dès l’ouverture du dépôt, on peut ajouter les **badges** en haut. Voici un exemple complet avec badges pour version, statut du build, licence et Python :
-
-````markdown
 # 🛠️ BETA-MULTITOOL
 
 ![Python](https://img.shields.io/badge/python-3.9%2B-blue?logo=python)
