@@ -1,9 +1,9 @@
 # 🛠️ BETA-MULTITOOL
 
 ![Python](https://img.shields.io/badge/python-3.9%2B-blue?logo=python)
-![License](https://img.shields.io/badge/license-MIT-green)
 ![GitHub last commit](https://img.shields.io/github/last-commit/T4nguy01/BETA-MULTITOOL)
-![GitHub issues](https://img.shields.io/github/issues/T4nguy01/BETA-MULTITOOL)
+![GitHub release](https://img.shields.io/github/v/release/T4nguy01/BETA-MULTITOOL)
+![License](https://img.shields.io/github/license/T4nguy01/BETA-MULTITOOL)
 
 Un outil polyvalent en Python permettant d’exécuter plusieurs fonctions utiles pour gérer et automatiser différentes tâches sur Windows et Linux. Idéal pour les techniciens, développeurs ou toute personne souhaitant centraliser plusieurs utilitaires dans une seule application.
 
