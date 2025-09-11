@@ -39,4 +39,4 @@ build/
 *.zip
 
 # Configuration privée (non suivie par Git)
-config.py
+BETA-MULTITOOL.lnk
