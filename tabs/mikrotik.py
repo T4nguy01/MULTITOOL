@@ -1,12 +1,13 @@
 # tabs/mikrotik.py
 from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QPlainTextEdit,
-    QDialog, QLineEdit, QLabel, QFormLayout, QDialogButtonBox
+    QDialog, QLineEdit, QFormLayout, QDialogButtonBox
 )
-from PyQt6.QtGui import QFont, QIcon, QColor, QPalette
+from PyQt6.QtGui import QFont, QIcon
 from PyQt6.QtCore import Qt
-from core import mikrotik as core_mikrotik
 import os
+from core import mikrotik as core_mikrotik
+
 
 class MikrotikTab(QWidget):
     def __init__(self):
@@ -32,22 +33,19 @@ class MikrotikTab(QWidget):
         self.terminal.setPlainText(core_mikrotik.base_config())
         layout.addWidget(self.terminal, 2)
 
-        # Boutons pour ajouter des blocs
+        # Boutons
         btn_layout = QHBoxLayout()
         btn_layout.setSpacing(10)
         layout.addLayout(btn_layout)
 
-        # Dossier ressources pour icônes
         icon_path = lambda name: os.path.join("resources", "icons", f"{name}.svg")
 
-        self.wifi_btn = QPushButton("Wi-Fi")
-        self.wifi_btn.setIcon(QIcon(icon_path("wifi")))
-        self.vlan_btn = QPushButton("VLAN")
-        self.vlan_btn.setIcon(QIcon(icon_path("vlan")))
-        self.nat_btn = QPushButton("NAT")
-        self.nat_btn.setIcon(QIcon(icon_path("nat")))
+        self.lan_btn = QPushButton("Ajout LAN")
+        self.lan_btn.setIcon(QIcon(icon_path("lan")))
+        self.port_btn = QPushButton("Redirection de Port")
+        self.port_btn.setIcon(QIcon(icon_path("nat")))
 
-        for btn in [self.wifi_btn, self.vlan_btn, self.nat_btn]:
+        for btn in [self.lan_btn, self.port_btn]:
             btn.setCursor(Qt.CursorShape.PointingHandCursor)
             btn.setStyleSheet("""
                 QPushButton {
@@ -63,24 +61,30 @@ class MikrotikTab(QWidget):
             btn_layout.addWidget(btn)
 
         # Connexions
-        self.wifi_btn.clicked.connect(self.add_wifi)
-        self.vlan_btn.clicked.connect(self.add_vlan)
-        self.nat_btn.clicked.connect(self.add_nat)
+        self.lan_btn.clicked.connect(self.add_lan)
+        self.port_btn.clicked.connect(self.add_port_forward)
 
-    def insert_config(self, config_text):
+    def insert_config(self, config_text: str):
         """Insère un bloc dans le terminal."""
         self.terminal.appendPlainText(config_text)
 
-    # --- Popups pour config ---
-    def add_wifi(self):
+    # --- Popups ---
+    def add_lan(self):
         dialog = QDialog(self)
-        dialog.setWindowTitle("Ajouter Wi-Fi")
+        dialog.setWindowTitle("Ajouter un LAN")
         layout = QFormLayout(dialog)
 
-        ssid_input = QLineEdit()
-        key_input = QLineEdit()
-        layout.addRow("SSID:", ssid_input)
-        layout.addRow("Clé WPA2:", key_input)
+        iface_input = QLineEdit()
+        ip_input = QLineEdit()
+        mask_input = QLineEdit()
+        dhcp_start_input = QLineEdit()
+        dhcp_end_input = QLineEdit()
+
+        layout.addRow("Port Ethernet:", iface_input)
+        layout.addRow("Adresse IP LAN:", ip_input)
+        layout.addRow("Masque:", mask_input)
+        layout.addRow("DHCP Début:", dhcp_start_input)
+        layout.addRow("DHCP Fin:", dhcp_end_input)
 
         buttons = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel)
         layout.addWidget(buttons)
@@ -88,23 +92,31 @@ class MikrotikTab(QWidget):
         buttons.rejected.connect(dialog.reject)
 
         if dialog.exec() == QDialog.DialogCode.Accepted:
-            ssid = ssid_input.text()
-            key = key_input.text()
-            self.insert_config(core_mikrotik.wifi_block(ssid, key))
+            config = core_mikrotik.lan_block(
+                iface_input.text(),
+                ip_input.text(),
+                mask_input.text(),
+                dhcp_start_input.text(),
+                dhcp_end_input.text(),
+            )
+            self.insert_config(config)
 
-    def add_nat(self):
+    def add_port_forward(self):
         dialog = QDialog(self)
-        dialog.setWindowTitle("Ajouter NAT")
+        dialog.setWindowTitle("Ajouter une redirection de port")
         layout = QFormLayout(dialog)
 
         to_ip_input = QLineEdit()
-        to_port_input = QLineEdit()
-        src_input = QLineEdit()
-        dst_port_input = QLineEdit()
-        layout.addRow("To IP:", to_ip_input)
-        layout.addRow("To Port:", to_port_input)
-        layout.addRow("Src Address:", src_input)
-        layout.addRow("Dst Port:", dst_port_input)
+        lan_port_input = QLineEdit()
+        proto_input = QLineEdit()
+        wan_ip_input = QLineEdit()
+        wan_port_input = QLineEdit()
+
+        layout.addRow("Adresse LAN:", to_ip_input)
+        layout.addRow("Port LAN:", lan_port_input)
+        layout.addRow("Protocole:", proto_input)
+        layout.addRow("IP WAN (optionnel):", wan_ip_input)
+        layout.addRow("Port WAN:", wan_port_input)
 
         buttons = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel)
         layout.addWidget(buttons)
@@ -112,33 +124,11 @@ class MikrotikTab(QWidget):
         buttons.rejected.connect(dialog.reject)
 
         if dialog.exec() == QDialog.DialogCode.Accepted:
-            self.insert_config(core_mikrotik.nat_block(
+            config = core_mikrotik.port_forward_block(
                 to_ip_input.text(),
-                int(to_port_input.text()),
-                src_input.text(),
-                int(dst_port_input.text())
-            ))
-
-    def add_vlan(self):
-        dialog = QDialog(self)
-        dialog.setWindowTitle("Ajouter VLAN")
-        layout = QFormLayout(dialog)
-
-        vlan_id_input = QLineEdit()
-        iface_input = QLineEdit()
-        ip_net_input = QLineEdit()
-        layout.addRow("VLAN ID:", vlan_id_input)
-        layout.addRow("Interface:", iface_input)
-        layout.addRow("IP Network:", ip_net_input)
-
-        buttons = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel)
-        layout.addWidget(buttons)
-        buttons.accepted.connect(dialog.accept)
-        buttons.rejected.connect(dialog.reject)
-
-        if dialog.exec() == QDialog.DialogCode.Accepted:
-            self.insert_config(core_mikrotik.vlan_block(
-                int(vlan_id_input.text()),
-                iface_input.text(),
-                ip_net_input.text()
-            ))
+                lan_port_input.text(),
+                proto_input.text(),
+                wan_ip_input.text(),
+                wan_port_input.text(),
+            )
+            self.insert_config(config)

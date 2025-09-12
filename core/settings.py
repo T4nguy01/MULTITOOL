@@ -7,7 +7,12 @@ class SETTINGS:
     notifications = True
 
     # Paramètres réseau
-    ping_hosts = ["8.8.8.8", "1.1.1.1", "192.168.1.1", "google.com"]
+    ping_hosts = [
+        {"name": "Google", "host": "8.8.8.8"},
+        {"name": "OXO", "host": "192.168.1.246"},
+        {"name": "MYOPENIP", "host": "94.143.87.70"},
+        {"name": "CONVERGENCE", "host": "91.211.64.225"}
+    ]
 
     @classmethod
     def update(cls, theme=None, auto_update=None, notifications=None):
