@@ -13,6 +13,7 @@ from tabs.reseaux_config import ReseauxTab
 from tabs.reseaux_ping import ReseauxPingTab
 from tabs.mikrotik import MikrotikTab
 from tabs.parametres import ParametresTab
+from tabs.rainbow import RainbowTab  # <-- Nouveau onglet Rainbow
 
 class MainWindow(QMainWindow):
     def __init__(self, theme="light"):
@@ -42,6 +43,7 @@ class MainWindow(QMainWindow):
             ("Réseaux", "resources/icons/network.svg"),
             ("Ping", "resources/icons/ping.svg"),
             ("Mikrotik", "resources/icons/router.svg"),
+            ("Rainbow", "resources/icons/rainbow.svg"),  # <-- Icône Rainbow
             ("Paramètres", "resources/icons/settings.svg")
         ]
 
@@ -66,9 +68,10 @@ class MainWindow(QMainWindow):
         self.reseaux_tab = ReseauxTab()
         self.ping_tab = ReseauxPingTab()
         self.mikrotik_tab = MikrotikTab()
+        self.rainbow_tab = RainbowTab()
         self.param_tab = ParametresTab(main_window=self)
 
-        for widget in [self.accueil_tab, self.reseaux_tab, self.ping_tab, self.mikrotik_tab, self.param_tab]:
+        for widget in [self.accueil_tab, self.reseaux_tab, self.ping_tab, self.mikrotik_tab, self.rainbow_tab, self.param_tab]:
             self.stack.addWidget(widget)
 
         # Connexion boutons sidebar
@@ -77,7 +80,8 @@ class MainWindow(QMainWindow):
             self.sidebar_buttons[1]: self.reseaux_tab,
             self.sidebar_buttons[2]: self.ping_tab,
             self.sidebar_buttons[3]: self.mikrotik_tab,
-            self.sidebar_buttons[4]: self.param_tab
+            self.sidebar_buttons[4]: self.rainbow_tab,
+            self.sidebar_buttons[5]: self.param_tab
         }
         for btn, tab in self.tab_map.items():
             btn.clicked.connect(lambda checked, t=tab: self.stack.setCurrentWidget(t))
@@ -138,7 +142,6 @@ if __name__ == "__main__":
     pywinstyles.apply_style(app, style="mica")
 
     # Charger QSS
-    import os
     qss_path = os.path.join(os.path.dirname(__file__), "resources", "styles", "style.qss")
     with open(qss_path, "r", encoding="utf-8") as f:
         app.setStyleSheet(f.read())

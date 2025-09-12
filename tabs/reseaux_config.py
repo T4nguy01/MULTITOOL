@@ -1,6 +1,5 @@
 from PyQt6.QtWidgets import QWidget, QVBoxLayout, QLabel, QPushButton, QLineEdit, QTextEdit, QComboBox
-from core.network import get_interfaces, set_ip
-
+from core.network import get_interfaces, set_ip, set_dhcp
 
 class ReseauxTab(QWidget):
     def __init__(self):
@@ -27,9 +26,11 @@ class ReseauxTab(QWidget):
         layout.addWidget(self.mask_input)
         layout.addWidget(self.gateway_input)
 
-        # Bouton appliquer
-        self.apply_btn = QPushButton("Appliquer")
+        # Boutons appliquer / DHCP
+        self.apply_btn = QPushButton("Appliquer IP")
+        self.dhcp_btn = QPushButton("Passer en DHCP")
         layout.addWidget(self.apply_btn)
+        layout.addWidget(self.dhcp_btn)
 
         # Zone de résultat
         self.result_area = QTextEdit()
@@ -41,8 +42,9 @@ class ReseauxTab(QWidget):
         # Charger les interfaces réseau
         self.load_interfaces()
 
-        # Connexion bouton
+        # Connexion boutons
         self.apply_btn.clicked.connect(self.apply_config)
+        self.dhcp_btn.clicked.connect(self.apply_dhcp)
 
     def load_interfaces(self):
         """Remplit la liste des interfaces disponibles"""
@@ -65,8 +67,12 @@ class ReseauxTab(QWidget):
         result = set_ip(iface, ip, mask, gw)
         self.result_area.setPlainText(result)
 
-        # 🔗 Éventuel signal pour PingTab
-        try:
-            self.interface_changed.emit(ip)
-        except AttributeError:
-            pass
+    def apply_dhcp(self):
+        """Passe l'interface sélectionnée en DHCP"""
+        iface = self.interface_box.currentText()
+        if not iface:
+            self.result_area.setPlainText("⚠️ Veuillez sélectionner une interface.")
+            return
+
+        result = set_dhcp(iface)
+        self.result_area.setPlainText(result)
