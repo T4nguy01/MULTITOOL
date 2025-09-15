@@ -1,3 +1,5 @@
+# tab_reseau.py (ou où que soit ta classe ReseauxTab)
+
 from PyQt6.QtWidgets import QWidget, QVBoxLayout, QLabel, QPushButton, QLineEdit, QTextEdit, QComboBox
 from core.network import get_interfaces, set_ip, set_dhcp
 
@@ -39,19 +41,34 @@ class ReseauxTab(QWidget):
 
         self.setLayout(layout)
 
+        # Variables
+        self.interfaces = {}
+
         # Charger les interfaces réseau
         self.load_interfaces()
 
         # Connexion boutons
         self.apply_btn.clicked.connect(self.apply_config)
         self.dhcp_btn.clicked.connect(self.apply_dhcp)
+        self.interface_box.currentTextChanged.connect(self.update_fields_from_selection)
 
     def load_interfaces(self):
-        """Remplit la liste des interfaces disponibles"""
-        interfaces = get_interfaces()
+        """Remplit la liste des interfaces disponibles avec leurs infos IP"""
+        self.interfaces = get_interfaces()
         self.interface_box.clear()
-        for iface in interfaces.keys():
+        for iface in self.interfaces.keys():
             self.interface_box.addItem(iface)
+
+        # Remplir les champs avec l'interface actuelle
+        if self.interfaces:
+            self.update_fields_from_selection(self.interface_box.currentText())
+
+    def update_fields_from_selection(self, iface_name):
+        """Met à jour les champs IP / masque / passerelle selon l'interface choisie"""
+        info = self.interfaces.get(iface_name, {})
+        self.ip_input.setText(info.get("ip", ""))
+        self.mask_input.setText(info.get("mask", ""))
+        self.gateway_input.setText(info.get("gateway", ""))
 
     def apply_config(self):
         """Applique une nouvelle configuration réseau"""
