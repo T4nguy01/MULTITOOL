@@ -1,0 +1,160 @@
+/* ===============================
+   GLOBAL
+   =============================== */
+QWidget {
+    background-color: #1E1E2F;
+    color: #E1E1E6;
+    font-family: "Segoe UI Variable", "Segoe UI", sans-serif;
+    font-size: 11pt;
+    transition: all 0.2s ease;
+}
+
+/* ===============================
+   SIDEBAR BUTTONS
+   =============================== */
+#sidebarButton {
+    background-color: transparent;
+    color: #E1E1E6;
+    border: none;
+    text-align: left;
+    padding-left: 12px;
+    border-radius: 8px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+#sidebarButton:hover {
+    background-color: rgba(0, 120, 215, 0.12);
+    color: #C7D9FF;
+}
+
+#sidebarButton:pressed {
+    background-color: rgba(0, 120, 215, 0.2);
+}
+
+#sidebarButton:checked {
+    border: 2px solid #0078D7;
+    background-color: rgba(0, 120, 215, 0.25);
+    color: #AAD4FF;
+    font-weight: 600;
+}
+
+/* ===============================
+   PUSHBUTTON (ONGLETS / APP)
+   =============================== */
+QPushButton {
+    background-color: #2D2D30;
+    color: #E1E1E6;
+    border: 1px solid #444444;
+    border-radius: 10px;
+    padding: 8px 14px;
+    font-weight: 500;
+    min-height: 32px;
+    transition: all 0.2s ease;
+}
+
+QPushButton:hover {
+    background-color: #3B3B42;
+    border-color: #0078D7;
+    color: #C7D9FF;
+}
+
+QPushButton:pressed {
+    background-color: #005A9E;
+    border-color: #005A9E;
+    color: #FFFFFF;
+}
+
+/* ===============================
+   QLINEEDIT / QTextEdit / QTextBrowser
+   =============================== */
+QLineEdit, QTextEdit, QTextBrowser {
+    background-color: #252533;
+    border: 1.5px solid #444444;
+    color: #E1E1E6;
+    border-radius: 10px;
+    padding: 8px 10px;
+    font-size: 10pt;
+    transition: all 0.2s ease;
+}
+
+QLineEdit:focus, QTextEdit:focus, QTextBrowser:focus {
+    border-color: #0078D7;
+    background-color: #2C2C3C;
+}
+
+/* ===============================
+   QSTACKEDWIDGET / QTABWIDGET
+   =============================== */
+QTabWidget::pane {
+    border: none;
+    background-color: #1E1E2F;
+}
+
+QTabBar::tab {
+    background: #2D2D30;
+    color: #E1E1E6;
+    padding: 8px 18px;
+    border-radius: 10px;
+    margin: 3px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+QTabBar::tab:selected {
+    background: #0078D7;
+    color: #FFFFFF;
+}
+
+QTabBar::tab:hover:!selected {
+    background: #3B3B42;
+    color: #C7D9FF;
+}
+
+/* ===============================
+   SCROLLBAR
+   =============================== */
+QScrollBar:vertical {
+    background: #1E1E2F;
+    width: 12px;
+    margin: 0px;
+    border-radius: 6px;
+}
+
+QScrollBar::handle:vertical {
+    background: #555565;
+    min-height: 28px;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+}
+
+QScrollBar::handle:vertical:hover {
+    background: #0078D7;
+}
+
+QScrollBar::add-line, QScrollBar::sub-line {
+    background: none;
+    height: 0px;
+}
+
+/* ===============================
+   TOOLTIP
+   =============================== */
+QToolTip {
+    background-color: #2A2A3A;
+    color: #E1E1E6;
+    border: 1px solid #0078D7;
+    padding: 6px;
+    border-radius: 6px;
+    font-size: 12px;
+}
+
+/* Terminal Mikrotik */
+#mikrotikTerminal {
+    background-color: #252533;
+    color: #E1E1E6;
+    border-radius: 10px;
+    padding: 8px;
+    font-family: "Consolas", monospace;
+    font-size: 11pt;
+}

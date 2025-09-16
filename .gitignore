@@ -1,0 +1,43 @@
+# Fichiers Python compilés
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Fichiers temporaires
+*.tmp
+*.log
+*.bak
+
+# Fichiers PyCharm / IDE
+.idea/
+*.iml
+.vscode/
+
+# Windows
+Thumbs.db
+Desktop.ini
+*.DS_Store
+
+# Environnement virtuel
+env/
+venv/
+ENV/
+.venv/
+
+# Fichiers dist / build
+dist/
+build/
+*.egg-info/
+*.egg
+
+# Executables
+*.exe
+*.dll
+*.pyd
+
+# Zip ou fichiers temporaires téléchargés
+*.zip
+
+# Configuration privée (non suivie par Git)
+BETA-MULTITOOL.lnk
+config.py

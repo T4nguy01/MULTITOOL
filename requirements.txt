@@ -1,0 +1,6 @@
+PyQt6
+pywinstyles
+requests
+psutil
+pdfplumber
+QPixmap
