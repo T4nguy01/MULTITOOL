@@ -1,160 +1,485 @@
 /* ===============================
-   GLOBAL
+   VARIABLES CSS (Custom Properties)
+   =============================== */
+/* Note: Qt ne supporte pas les variables CSS natives, 
+   mais on peut utiliser des commentaires pour la documentation */
+
+/* Couleurs principales :
+   --bg-primary: #1E1E2F
+   --bg-secondary: #2D2D30
+   --bg-tertiary: #252533
+   --accent: #0078D7
+   --accent-hover: #005A9E
+   --text-primary: #E1E1E6
+   --text-secondary: #C7D9FF
+   --border: #444444
+   --border-radius: 10px
+*/
+
+/* ===============================
+   GLOBAL STYLES
    =============================== */
 QWidget {
     background-color: #1E1E2F;
     color: #E1E1E6;
-    font-family: "Segoe UI Variable", "Segoe UI", sans-serif;
+    font-family: "Segoe UI Variable", "Segoe UI", "Inter", "SF Pro Display", sans-serif;
     font-size: 11pt;
-    transition: all 0.2s ease;
+    font-weight: 400;
+    selection-background-color: #0078D7;
+    selection-color: #FFFFFF;
+}
+
+/* Amélioration de la lisibilité */
+QWidget:disabled {
+    color: #6B6B7B;
+    background-color: #1A1A26;
 }
 
 /* ===============================
-   SIDEBAR BUTTONS
+   SIDEBAR BUTTONS - MODERNISÉS
    =============================== */
 #sidebarButton {
     background-color: transparent;
     color: #E1E1E6;
     border: none;
     text-align: left;
-    padding-left: 12px;
-    border-radius: 8px;
+    padding: 12px 16px 12px 12px;
+    border-radius: 12px;
     font-weight: 500;
-    transition: all 0.2s ease;
+    min-height: 40px;
+    icon-size: 20px;
+    /* Transition plus fluide */
 }
 
 #sidebarButton:hover {
-    background-color: rgba(0, 120, 215, 0.12);
+    background-color: rgba(0, 120, 215, 0.15);
     color: #C7D9FF;
+    /* Effet de glow subtil */
+    border: 1px solid rgba(0, 120, 215, 0.3);
 }
 
 #sidebarButton:pressed {
-    background-color: rgba(0, 120, 215, 0.2);
+    background-color: rgba(0, 120, 215, 0.25);
+    transform: scale(0.98);
 }
 
 #sidebarButton:checked {
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+                                stop:0 rgba(0, 120, 215, 0.8),
+                                stop:1 rgba(0, 120, 215, 0.4));
     border: 2px solid #0078D7;
-    background-color: rgba(0, 120, 215, 0.25);
-    color: #AAD4FF;
+    color: #FFFFFF;
     font-weight: 600;
+    /* Ombre interne pour profondeur */
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* Style pour sidebar rétractée */
+#sidebarButton[text=""] {
+    text-align: center;
+    padding: 12px;
+    min-width: 40px;
 }
 
 /* ===============================
-   PUSHBUTTON (ONGLETS / APP)
+   PUSHBUTTONS - DESIGN MODERNE
    =============================== */
 QPushButton {
-    background-color: #2D2D30;
+    background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                                stop:0 #3A3A42,
+                                stop:1 #2D2D35);
     color: #E1E1E6;
-    border: 1px solid #444444;
-    border-radius: 10px;
-    padding: 8px 14px;
+    border: 1.5px solid #4A4A52;
+    border-radius: 12px;
+    padding: 12px 20px;
     font-weight: 500;
-    min-height: 32px;
-    transition: all 0.2s ease;
+    min-height: 16px;
+    font-size: 10pt;
 }
 
 QPushButton:hover {
-    background-color: #3B3B42;
+    background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                                stop:0 #4A4A52,
+                                stop:1 #3B3B42);
     border-color: #0078D7;
     color: #C7D9FF;
+    /* Légère élévation */
+    margin-top: -1px;
 }
 
 QPushButton:pressed {
-    background-color: #005A9E;
+    background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                                stop:0 #005A9E,
+                                stop:1 #0078D7);
     border-color: #005A9E;
+    color: #FFFFFF;
+    margin-top: 1px;
+}
+
+QPushButton:disabled {
+    background-color: #1A1A26;
+    color: #6B6B7B;
+    border-color: #2A2A32;
+}
+
+/* Boutons primaires */
+QPushButton[class="primary"] {
+    background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                                stop:0 #0088FF,
+                                stop:1 #0078D7);
+    border-color: #0078D7;
+    color: #FFFFFF;
+    font-weight: 600;
+}
+
+QPushButton[class="primary"]:hover {
+    background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                                stop:0 #0099FF,
+                                stop:1 #0088FF);
+}
+
+/* Boutons de danger */
+QPushButton[class="danger"] {
+    background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                                stop:0 #FF4757,
+                                stop:1 #FF3742);
+    border-color: #FF3742;
     color: #FFFFFF;
 }
 
 /* ===============================
-   QLINEEDIT / QTextEdit / QTextBrowser
+   INPUTS - DESIGN AMÉLIORÉ
    =============================== */
 QLineEdit, QTextEdit, QTextBrowser {
     background-color: #252533;
-    border: 1.5px solid #444444;
+    border: 2px solid #3A3A42;
     color: #E1E1E6;
-    border-radius: 10px;
-    padding: 8px 10px;
+    border-radius: 12px;
+    padding: 12px 16px;
     font-size: 10pt;
-    transition: all 0.2s ease;
+    font-family: "Segoe UI Variable", monospace;
 }
 
-QLineEdit:focus, QTextEdit:focus, QTextBrowser:focus {
+QLineEdit:focus, QTextEdit:focus {
     border-color: #0078D7;
-    background-color: #2C2C3C;
+    background-color: #2A2A3A;
+    /* Glow effect */
+    box-shadow: 0 0 0 3px rgba(0, 120, 215, 0.2);
+}
+
+QLineEdit:hover, QTextEdit:hover {
+    border-color: #5A5A62;
+}
+
+/* Placeholder text styling */
+QLineEdit[placeholderText] {
+    color: #8A8A9A;
 }
 
 /* ===============================
-   QSTACKEDWIDGET / QTABWIDGET
+   COMBOBOX - STYLE MODERNE
+   =============================== */
+QComboBox {
+    background-color: #2D2D35;
+    border: 2px solid #4A4A52;
+    border-radius: 12px;
+    padding: 8px 16px;
+    color: #E1E1E6;
+    min-height: 20px;
+}
+
+QComboBox:hover {
+    border-color: #0078D7;
+    background-color: #3A3A42;
+}
+
+QComboBox:on {
+    border-color: #0078D7;
+    background-color: #2A2A3A;
+}
+
+QComboBox::drop-down {
+    border: none;
+    width: 30px;
+}
+
+QComboBox::down-arrow {
+    image: none;
+    border: 5px solid transparent;
+    border-top: 5px solid #E1E1E6;
+    margin-right: 8px;
+}
+
+QComboBox QAbstractItemView {
+    background-color: #2D2D35;
+    border: 2px solid #0078D7;
+    border-radius: 8px;
+    color: #E1E1E6;
+    selection-background-color: #0078D7;
+    selection-color: #FFFFFF;
+}
+
+/* ===============================
+   TABS - DESIGN MODERNE
    =============================== */
 QTabWidget::pane {
     border: none;
     background-color: #1E1E2F;
+    border-radius: 12px;
 }
 
 QTabBar::tab {
-    background: #2D2D30;
+    background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                                stop:0 #3A3A42,
+                                stop:1 #2D2D35);
     color: #E1E1E6;
-    padding: 8px 18px;
-    border-radius: 10px;
-    margin: 3px;
+    padding: 12px 24px;
+    border-radius: 12px;
+    margin: 2px 4px;
     font-weight: 500;
-    transition: all 0.2s ease;
+    border: 1px solid transparent;
 }
 
 QTabBar::tab:selected {
-    background: #0078D7;
+    background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                                stop:0 #0088FF,
+                                stop:1 #0078D7);
     color: #FFFFFF;
+    font-weight: 600;
+    border-color: #0078D7;
 }
 
 QTabBar::tab:hover:!selected {
-    background: #3B3B42;
+    background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                                stop:0 #4A4A52,
+                                stop:1 #3B3B42);
     color: #C7D9FF;
+    border-color: rgba(0, 120, 215, 0.5);
 }
 
 /* ===============================
-   SCROLLBAR
+   SCROLLBARS - DESIGN MODERNE
    =============================== */
 QScrollBar:vertical {
-    background: #1E1E2F;
-    width: 12px;
+    background: rgba(30, 30, 47, 0.3);
+    width: 14px;
     margin: 0px;
-    border-radius: 6px;
+    border-radius: 7px;
 }
 
 QScrollBar::handle:vertical {
-    background: #555565;
-    min-height: 28px;
-    border-radius: 6px;
-    transition: all 0.2s ease;
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+                                stop:0 #555565,
+                                stop:1 #666676);
+    min-height: 30px;
+    border-radius: 7px;
+    margin: 2px;
 }
 
 QScrollBar::handle:vertical:hover {
-    background: #0078D7;
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+                                stop:0 #0078D7,
+                                stop:1 #0088FF);
 }
 
-QScrollBar::add-line, QScrollBar::sub-line {
+QScrollBar::handle:vertical:pressed {
+    background: #005A9E;
+}
+
+QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
     background: none;
     height: 0px;
 }
 
-/* ===============================
-   TOOLTIP
-   =============================== */
-QToolTip {
-    background-color: #2A2A3A;
-    color: #E1E1E6;
-    border: 1px solid #0078D7;
-    padding: 6px;
-    border-radius: 6px;
-    font-size: 12px;
+QScrollBar:horizontal {
+    background: rgba(30, 30, 47, 0.3);
+    height: 14px;
+    border-radius: 7px;
 }
 
-/* Terminal Mikrotik */
-#mikrotikTerminal {
-    background-color: #252533;
-    color: #E1E1E6;
-    border-radius: 10px;
-    padding: 8px;
-    font-family: "Consolas", monospace;
-    font-size: 11pt;
+QScrollBar::handle:horizontal {
+    background: #555565;
+    border-radius: 7px;
+    margin: 2px;
 }
+
+/* ===============================
+   CHECKBOX & RADIO - MODERNE
+   =============================== */
+QCheckBox {
+    color: #E1E1E6;
+    font-weight: 500;
+    spacing: 8px;
+}
+
+QCheckBox::indicator {
+    width: 18px;
+    height: 18px;
+    border-radius: 4px;
+    border: 2px solid #4A4A52;
+    background-color: #2D2D35;
+}
+
+QCheckBox::indicator:hover {
+    border-color: #0078D7;
+    background-color: #3A3A42;
+}
+
+QCheckBox::indicator:checked {
+    background-color: #0078D7;
+    border-color: #0078D7;
+    image: url(data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIiIGhlaWdodD0iOSIgdmlld0JveD0iMCAwIDEyIDkiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxwYXRoIGQ9Ik0xIDQuNUw0LjUgOEwxMSAxIiBzdHJva2U9IndoaXRlIiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPgo8L3N2Zz4K);
+}
+
+/* ===============================
+   PROGRESSBAR - MODERNE
+   =============================== */
+QProgressBar {
+    background-color: #2D2D35;
+    border: 2px solid #4A4A52;
+    border-radius: 12px;
+    height: 8px;
+    text-align: center;
+    color: #E1E1E6;
+    font-weight: 500;
+}
+
+QProgressBar::chunk {
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+                                stop:0 #0078D7,
+                                stop:1 #0088FF);
+    border-radius: 8px;
+    margin: 2px;
+}
+
+/* ===============================
+   TOOLTIP - DESIGN MODERNE
+   =============================== */
+QToolTip {
+    background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                                stop:0 #3A3A42,
+                                stop:1 #2A2A32);
+    color: #E1E1E6;
+    border: 2px solid #0078D7;
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-size: 10pt;
+    font-weight: 500;
+    /* Ombre portée simulée */
+    margin: 4px;
+}
+
+/* ===============================
+   COMPOSANTS SPÉCIFIQUES
+   =============================== */
+
+/* Terminal Mikrotik - Style amélioré */
+#mikrotikTerminal {
+    background-color: #1A1A26;
+    color: #E1E1E6;
+    border: 2px solid #3A3A42;
+    border-radius: 12px;
+    padding: 16px;
+    font-family: "JetBrains Mono", "Fira Code", "Consolas", monospace;
+    font-size: 10pt;
+    line-height: 1.4;
+}
+
+#mikrotikTerminal:focus {
+    border-color: #0078D7;
+    box-shadow: 0 0 0 3px rgba(0, 120, 215, 0.2);
+}
+
+/* Boutons de contrôle Windows */
+QPushButton[class="window-control"] {
+    background-color: transparent;
+    border: none;
+    border-radius: 6px;
+    padding: 8px;
+    min-width: 46px;
+    max-width: 46px;
+    min-height: 32px;
+    max-height: 32px;
+}
+
+QPushButton[class="window-control"]:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+QPushButton[class="window-control-close"]:hover {
+    background-color: #E81123;
+    color: white;
+}
+
+/* ===============================
+   ÉTATS DE STATUT
+   =============================== */
+QLabel[status="success"] {
+    color: #00D084;
+    font-weight: 600;
+}
+
+QLabel[status="warning"] {
+    color: #FFB800;
+    font-weight: 600;
+}
+
+QLabel[status="error"] {
+    color: #FF4757;
+    font-weight: 600;
+}
+
+QLabel[status="info"] {
+    color: #0078D7;
+    font-weight: 600;
+}
+
+/* ===============================
+   GROUPBOX - CONTENEURS
+   =============================== */
+QGroupBox {
+    background-color: rgba(45, 45, 48, 0.5);
+    border: 2px solid #4A4A52;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 11pt;
+    color: #C7D9FF;
+    margin-top: 12px;
+    padding-top: 8px;
+}
+
+QGroupBox::title {
+    subcontrol-origin: margin;
+    subcontrol-position: top left;
+    padding: 4px 12px;
+    background-color: #0078D7;
+    border-radius: 6px;
+    color: white;
+    left: 12px;
+    top: -6px;
+}
+
+/* ===============================
+   ANIMATIONS & EFFETS
+   =============================== */
+
+/* Note: Qt ne supporte pas les animations CSS,
+   mais ces propriétés peuvent être utilisées
+   avec QPropertyAnimation en Python */
+
+/*
+QWidget[animated="true"] {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+QWidget[fade-in="true"] {
+    opacity: 0;
+    animation: fadeIn 0.5s ease-in-out forwards;
+}
+
+@keyframes fadeIn {
+    to {
+        opacity: 1;
+    }
+}
+*/

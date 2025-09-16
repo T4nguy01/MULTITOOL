@@ -1,3 +1,4 @@
+# main.py
 import sys
 import os
 from PyQt6.QtGui import QIcon, QPixmap, QPainter, QColor
@@ -14,7 +15,7 @@ from tabs.reseaux_config import ReseauxTab
 from tabs.reseaux_ping import ReseauxPingTab
 from tabs.mikrotik import MikrotikTab
 from tabs.parametres import ParametresTab
-from tabs.rainbow import RainbowTab  # <-- Nouveau onglet Rainbow
+from tabs.rainbow import RainbowTab  # Nouveau onglet Rainbow
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -48,20 +49,20 @@ class MainWindow(QMainWindow):
             ("Paramètres", os.path.join(base_path, "settings.svg"))
         ]
 
+        # Création boutons sidebar
         self.sidebar_buttons = []
         for text, icon_path in self.buttons_info:
             btn = QPushButton(text)
             btn.setFixedHeight(40)
             btn.setObjectName("sidebarButton")
-            btn.setStyleSheet("text-align:left; padding-left:8px;")
-            btn.setToolTip(text)  # Tooltip quand réduit
             btn.setCheckable(True)
+            btn.setToolTip(text)
             self.sidebar_layout.addWidget(btn)
             self.sidebar_buttons.append(btn)
 
         self.sidebar_layout.addStretch()
 
-        # Groupe exclusif pour sidebar buttons (un seul bouton checked)
+        # Groupe exclusif
         self.sidebar_group = QButtonGroup()
         self.sidebar_group.setExclusive(True)
         for btn in self.sidebar_buttons:
@@ -79,64 +80,60 @@ class MainWindow(QMainWindow):
         self.rainbow_tab = RainbowTab()
         self.param_tab = ParametresTab(main_window=self)
 
-        for widget in [self.accueil_tab, self.reseaux_tab, self.ping_tab, self.mikrotik_tab, self.rainbow_tab, self.param_tab]:
-            self.stack.addWidget(widget)
+        self.tabs_list = [
+            self.accueil_tab,
+            self.reseaux_tab,
+            self.ping_tab,
+            self.mikrotik_tab,
+            self.rainbow_tab,
+            self.param_tab
+        ]
+        for tab in self.tabs_list:
+            self.stack.addWidget(tab)
 
         # Connexion boutons sidebar
-        self.tab_map = {
-            self.sidebar_buttons[0]: self.accueil_tab,
-            self.sidebar_buttons[1]: self.reseaux_tab,
-            self.sidebar_buttons[2]: self.ping_tab,
-            self.sidebar_buttons[3]: self.mikrotik_tab,
-            self.sidebar_buttons[4]: self.rainbow_tab,
-            self.sidebar_buttons[5]: self.param_tab
-        }
-        for btn, tab in self.tab_map.items():
-            btn.clicked.connect(lambda checked, t=tab, b=btn: self.stack.setCurrentWidget(t))
-            btn.clicked.connect(lambda checked, b=btn: b.setChecked(True))
+        for btn, tab in zip(self.sidebar_buttons, self.tabs_list):
+            btn.clicked.connect(lambda checked, t=tab, b=btn: self.select_tab(t, b))
 
         # Onglet par défaut
-        self.sidebar_buttons[0].setChecked(True)
-        self.stack.setCurrentWidget(self.accueil_tab)
+        self.select_tab(self.accueil_tab, self.sidebar_buttons[0])
 
         # Connexion interface sélectionnée (Reseaux → Ping)
-        try:
+        if hasattr(self.reseaux_tab, "interface_changed"):
             self.reseaux_tab.interface_changed.connect(self.ping_tab.set_default_host)
-        except AttributeError:
-            pass
 
         # Sidebar rétractable au hover
         self.sidebar_container.installEventFilter(self)
 
-        # Appliquer les icônes recolorées en blanc
+        # Appliquer icônes recolorées
         self.apply_sidebar_icons()
+
+    def select_tab(self, tab_widget, button):
+        """Affiche l’onglet et coche le bouton correspondant"""
+        self.stack.setCurrentWidget(tab_widget)
+        button.setChecked(True)
 
     def load_svg_icon_white(self, path, size=24):
         pixmap = QPixmap(size, size)
-        pixmap.fill(QColor(0, 0, 0, 0))  # transparent
-
-        renderer = QSvgRenderer(path)
-        painter = QPainter(pixmap)
-        painter.setRenderHints(QPainter.RenderHint.Antialiasing | QPainter.RenderHint.SmoothPixmapTransform)
-        renderer.render(painter)
-
-        # Appliquer un masque blanc (coloration)
-        painter.setCompositionMode(QPainter.CompositionMode.CompositionMode_SourceIn)
-        painter.fillRect(pixmap.rect(), QColor("white"))
-
-        painter.end()
-
+        pixmap.fill(QColor(0, 0, 0, 0))
+        try:
+            renderer = QSvgRenderer(path)
+            painter = QPainter(pixmap)
+            painter.setRenderHints(QPainter.RenderHint.Antialiasing | QPainter.RenderHint.SmoothPixmapTransform)
+            renderer.render(painter)
+            painter.setCompositionMode(QPainter.CompositionMode.CompositionMode_SourceIn)
+            painter.fillRect(pixmap.rect(), QColor("white"))
+            painter.end()
+        except Exception as e:
+            print(f"⚠️ Erreur icône {path} : {e}")
         return QIcon(pixmap)
 
     def apply_sidebar_icons(self):
-        """Charge les icônes SVG monochromes recolorées en blanc."""
         for btn, (_, icon_path) in zip(self.sidebar_buttons, self.buttons_info):
             if os.path.exists(icon_path):
-                print(f"Chargement icône : {icon_path}")  # DEBUG
                 btn.setIcon(self.load_svg_icon_white(icon_path))
             else:
-                print(f"Fichier icône non trouvé : {icon_path}")  # DEBUG
-                btn.setIcon(QIcon())  # Icône vide si pas trouvée
+                btn.setIcon(QIcon())
 
     def eventFilter(self, source, event):
         if source == self.sidebar_container:
@@ -153,7 +150,6 @@ class MainWindow(QMainWindow):
         self.anim.setEndValue(width)
         self.anim.setEasingCurve(QEasingCurve.Type.InOutQuad)
         self.anim.start()
-
         for btn, (text, _) in zip(self.sidebar_buttons, self.buttons_info):
             if width > 60:
                 btn.setText(text)
@@ -164,13 +160,15 @@ class MainWindow(QMainWindow):
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-
     pywinstyles.apply_style(app, style="mica")
 
     # Charger QSS
     qss_path = os.path.join(os.path.dirname(__file__), "resources", "styles", "style.qss")
-    with open(qss_path, "r", encoding="utf-8") as f:
-        app.setStyleSheet(f.read())
+    try:
+        with open(qss_path, "r", encoding="utf-8") as f:
+            app.setStyleSheet(f.read())
+    except Exception as e:
+        print(f"⚠️ Impossible de charger le style : {e}")
 
     window = MainWindow()
     window.show()

@@ -1,95 +1,240 @@
-from PyQt6.QtWidgets import QWidget, QVBoxLayout, QLabel, QScrollArea, QFrame
-from PyQt6.QtGui import QFont, QPixmap
-from PyQt6.QtCore import Qt
-import requests
+import sys
 import os
+import requests
+import psutil
+import platform
+from datetime import datetime
+from PyQt6.QtCore import Qt, QTimer, QThread, pyqtSignal
+from PyQt6.QtGui import QPixmap, QFont
+from PyQt6.QtWidgets import (
+    QApplication, QWidget, QLabel, QVBoxLayout, QHBoxLayout,
+    QGroupBox, QFrame, QScrollArea
+)
 
+# Thread pour charger les commits GitHub
+class CommitsThread(QThread):
+    commits_loaded = pyqtSignal(list)
+
+    def run(self):
+        try:
+            url = "https://api.github.com/repos/T4nguy01/Multitool/commits"
+            response = requests.get(url)
+            if response.status_code == 200:
+                commits = response.json()[:5]  # 5 derniers commits
+                self.commits_loaded.emit(commits)
+            else:
+                self.commits_loaded.emit([])
+        except Exception:
+            self.commits_loaded.emit([])
+
+
+# Onglet d'accueil
 class AccueilTab(QWidget):
     def __init__(self):
         super().__init__()
+        self.version = self.load_version()
+        self.init_ui()
 
-        layout = QVBoxLayout()
-        layout.setContentsMargins(20, 20, 20, 20)
-        layout.setSpacing(20)
-
-        # Header logo / titre / version
-        header = QVBoxLayout()
-        logo_label = QLabel()
-        logo_pixmap = QPixmap(os.path.join("resources", "icons", "icon.ico")).scaled(
-            60, 60, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation
-        )
-        logo_label.setPixmap(logo_pixmap)
-        logo_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-
-        title_label = QLabel("MultiTool")
-        title_label.setFont(QFont("Segoe UI", 24, QFont.Weight.Bold))
-        title_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-
-        # Lire version depuis version.txt
-        version = "v?.?.?"  # fallback si fichier manquant
-        version_file = os.path.join(os.path.dirname(__file__), "..", "version.txt")
+    def load_version(self):
+        """Lit la version depuis version.txt"""
         try:
-            with open(version_file, "r", encoding="utf-8") as f:
-                version = f.read().strip()
-        except FileNotFoundError:
+            if os.path.exists("version.txt"):
+                with open("version.txt", "r", encoding="utf-8") as f:
+                    return f.read().strip()
+        except Exception:
             pass
+        return "?.?.?"  # Valeur par défaut si fichier absent
 
-        version_label = QLabel(version)
-        version_label.setFont(QFont("Segoe UI", 10))
-        version_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-
-        header.addWidget(logo_label)
-        header.addWidget(title_label)
-        header.addWidget(version_label)
-        layout.addLayout(header)
-
-        # Scroll area pour les nouveautés (commits)
+    def init_ui(self):
+        # Scroll principal pour rendre la page responsive
         scroll = QScrollArea()
         scroll.setWidgetResizable(True)
-        scroll_content = QWidget()
-        scroll_layout = QVBoxLayout()
-        scroll_layout.setSpacing(15)
-        scroll_content.setLayout(scroll_layout)
 
-        # Récupérer les 4 derniers commits
-        commits = self.get_latest_commits("T4nguy01", "MULTITOOL", count=4)
+        container = QWidget()
+        layout = QVBoxLayout(container)
 
-        for item in commits:
-            frame = QFrame()
-            frame.setStyleSheet("""
+        # Header
+        header = self.create_header()
+        layout.addWidget(header)
+
+        # Contenu principal
+        content_layout = QHBoxLayout()
+
+        # Colonne gauche (vide mais garde la structure)
+        left_column = QVBoxLayout()
+        left_column.addStretch()
+        content_layout.addLayout(left_column, 1)
+
+        # Colonne centrale - Commits
+        center_column = QVBoxLayout()
+        commits_group = QGroupBox("🕒 Derniers commits GitHub")
+        commits_group.setStyleSheet("""
+            QGroupBox {
+                font-size: 16px;
+                font-weight: bold;
+                color: #333;
+                border: 2px solid #0078D7;
+                border-radius: 10px;
+                margin-top: 10px;
+                background-color: #f9f9f9;
+            }
+        """)
+        self.commits_layout = QVBoxLayout()
+        commits_group.setLayout(self.commits_layout)
+        center_column.addWidget(commits_group)
+        content_layout.addLayout(center_column, 2)
+
+        # Colonne droite - Infos système
+        right_column = self.create_info_section()
+        content_layout.addLayout(right_column, 1)
+
+        layout.addLayout(content_layout)
+
+        # Charger commits
+        self.load_commits()
+
+        scroll.setWidget(container)
+
+        # Layout final
+        main_layout = QVBoxLayout(self)
+        main_layout.addWidget(scroll)
+
+    def create_header(self):
+        frame = QFrame()
+        frame.setStyleSheet("""
+            QFrame {
+                background-color: #0078D7;
+                padding: 10px;
+            }
+        """)
+        header_layout = QHBoxLayout(frame)
+
+        # Logo
+        logo_label = QLabel()
+        pixmap = QPixmap("logo.png")
+        if not pixmap.isNull():
+            logo_label.setPixmap(pixmap.scaled(50, 50, Qt.AspectRatioMode.KeepAspectRatio))
+        header_layout.addWidget(logo_label)
+
+        # Titre
+        title = QLabel("MULTITOOL - Tableau de bord")
+        title.setFont(QFont("Arial", 20, QFont.Weight.Bold))
+        title.setStyleSheet("color: white;")
+        header_layout.addWidget(title, alignment=Qt.AlignmentFlag.AlignLeft)
+
+        # Version depuis version.txt
+        version_label = QLabel(f"📦 v{self.version}")
+        version_label.setFont(QFont("Arial", 12))
+        version_label.setStyleSheet("color: white; font-weight: bold;")
+        header_layout.addWidget(version_label, alignment=Qt.AlignmentFlag.AlignRight)
+
+        # Horloge
+        self.clock_label = QLabel()
+        self.clock_label.setFont(QFont("Arial", 12))
+        self.clock_label.setStyleSheet("color: white;")
+        header_layout.addWidget(self.clock_label, alignment=Qt.AlignmentFlag.AlignRight)
+
+        timer = QTimer(self)
+        timer.timeout.connect(self.update_clock)
+        timer.start(1000)
+        self.update_clock()
+
+        # État système
+        status_label = QLabel("✅ Système opérationnel")
+        status_label.setStyleSheet("color: white; font-weight: bold;")
+        header_layout.addWidget(status_label, alignment=Qt.AlignmentFlag.AlignRight)
+
+        return frame
+
+    def create_info_section(self):
+        layout = QVBoxLayout()
+
+        # Infos système
+        system_group = QGroupBox("💻 Infos système")
+        system_group.setStyleSheet("""
+            QGroupBox {
+                font-size: 14px;
+                font-weight: bold;
+                color: #333;
+                border: 2px solid #28A745;
+                border-radius: 10px;
+                margin-top: 10px;
+                background-color: #f9f9f9;
+            }
+        """)
+
+        sys_layout = QVBoxLayout()
+
+        os_label = QLabel(f"OS : {platform.system()} {platform.release()}")
+        sys_layout.addWidget(os_label)
+
+        ram = psutil.virtual_memory()
+        ram_label = QLabel(f"RAM : {ram.used // (1024 ** 3)} Go / {ram.total // (1024 ** 3)} Go")
+        sys_layout.addWidget(ram_label)
+
+        cpu_usage = psutil.cpu_percent(interval=1)
+        cpu_label = QLabel(f"CPU : {cpu_usage}%")
+        sys_layout.addWidget(cpu_label)
+
+        system_group.setLayout(sys_layout)
+        layout.addWidget(system_group)
+
+        return layout
+
+    def load_commits(self):
+        self.commits_thread = CommitsThread()
+        self.commits_thread.commits_loaded.connect(self.display_commits)
+        self.commits_thread.start()
+
+    def display_commits(self, commits):
+        for i in reversed(range(self.commits_layout.count())):
+            item = self.commits_layout.itemAt(i)
+            if item and item.widget():
+                item.widget().deleteLater()
+
+        if not commits:
+            self.commits_layout.addWidget(QLabel("⚠️ Impossible de charger les commits"))
+            return
+
+        for commit in commits:
+            message = commit["commit"]["message"]
+            author = commit["commit"]["author"]["name"]
+            date_str = commit["commit"]["author"]["date"]
+            date = datetime.strptime(date_str, "%Y-%m-%dT%H:%M:%SZ")
+
+            commit_frame = QFrame()
+            commit_layout = QVBoxLayout()
+
+            commit_msg = QLabel(f"🔹 {message}")
+            commit_msg.setStyleSheet("font-weight: bold; color: #0078D7;")
+            commit_layout.addWidget(commit_msg)
+
+            commit_info = QLabel(f"✍️ {author} - {date.strftime('%d/%m/%Y %H:%M')}")
+            commit_info.setStyleSheet("color: #555;")
+            commit_layout.addWidget(commit_info)
+
+            commit_frame.setLayout(commit_layout)
+            commit_frame.setStyleSheet("""
                 QFrame {
-                    background-color: rgba(255, 255, 255, 0.05);
+                    background-color: #ffffff;
+                    border: 1px solid #ddd;
                     border-radius: 8px;
-                    padding: 10px;
+                    padding: 5px;
                 }
             """)
-            label = QLabel(item)
-            label.setWordWrap(True)
-            label.setFont(QFont("Segoe UI", 11))
-            frame_layout = QVBoxLayout()
-            frame_layout.addWidget(label)
-            frame.setLayout(frame_layout)
-            scroll_layout.addWidget(frame)
 
-        scroll_layout.addStretch()
-        scroll.setWidget(scroll_content)
-        layout.addWidget(scroll)
+            self.commits_layout.addWidget(commit_frame)
 
-        self.setLayout(layout)
+    def update_clock(self):
+        now = datetime.now().strftime("%H:%M:%S")
+        self.clock_label.setText(f"🕒 {now}")
 
-    def get_latest_commits(self, owner, repo, count=4):
-        """Récupère les derniers commits d’un repo GitHub public."""
-        url = f"https://api.github.com/repos/{owner}/{repo}/commits"
-        try:
-            response = requests.get(url, timeout=5)
-            response.raise_for_status()
-            data = response.json()
-            commits = []
-            for commit in data[:count]:
-                message = commit["commit"]["message"]
-                author = commit["commit"]["author"]["name"]
-                date = commit["commit"]["author"]["date"][:10]  # YYYY-MM-DD
-                commits.append(f"{date} - {author}: {message}")
-            return commits
-        except requests.RequestException:
-            return ["⚠️ Impossible de récupérer les commits GitHub. Vérifiez votre connexion internet."]
+
+# Lancer l'application en test
+if __name__ == "__main__":
+    app = QApplication(sys.argv)
+    window = AccueilTab()
+    window.setWindowTitle("MULTITOOL - Accueil")
+    window.resize(1000, 600)
+    window.show()
+    sys.exit(app.exec())

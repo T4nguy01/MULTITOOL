@@ -1,36 +1,48 @@
-# tabs/mikrotik.py
 from PyQt6.QtWidgets import (
-    QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QPlainTextEdit,
-    QDialog, QLineEdit, QFormLayout, QDialogButtonBox
+    QWidget, QVBoxLayout, QHBoxLayout, QPushButton,
+    QPlainTextEdit, QDialog, QLineEdit, QFormLayout,
+    QDialogButtonBox
 )
 from PyQt6.QtGui import QFont, QIcon
-from PyQt6.QtCore import Qt
+from PyQt6.QtCore import Qt, QThread, pyqtSignal
 import os
 from core import mikrotik as core_mikrotik
+
+
+class MikrotikWorker(QThread):
+    """Thread pour afficher ligne par ligne dans le terminal"""
+    output = pyqtSignal(str)
+
+    def __init__(self, config_text: str):
+        super().__init__()
+        self.config_text = config_text
+
+    def run(self):
+        for line in self.config_text.splitlines():
+            self.output.emit(line)
+            self.msleep(30)  # petite pause pour effet console
 
 
 class MikrotikTab(QWidget):
     def __init__(self):
         super().__init__()
-        self.setObjectName("mikrotikTab")
-        layout = QVBoxLayout()
-        layout.setContentsMargins(10, 10, 10, 10)
-        layout.setSpacing(15)
-        self.setLayout(layout)
+        self.init_ui()
+
+    def init_ui(self):
+        self.layout = QVBoxLayout(self)
+        self.layout.setContentsMargins(10, 10, 10, 10)
+        self.layout.setSpacing(12)
 
         # Terminal
         self.terminal = QPlainTextEdit()
-        self.terminal.setObjectName("mikrotikTerminal")  # pour QSS spécifique
+        self.terminal.setObjectName("mikrotikTerminal")
         self.terminal.setReadOnly(True)
-        self.terminal.setFont(QFont("Consolas", 11))
+        self.terminal.setFont(QFont("JetBrains Mono", 10))
         self.terminal.setPlainText(core_mikrotik.base_config())
-        layout.addWidget(self.terminal, 2)
+        self.layout.addWidget(self.terminal)
 
         # Boutons
         btn_layout = QHBoxLayout()
-        btn_layout.setSpacing(10)
-        layout.addLayout(btn_layout)
-
         icon_path = lambda name: os.path.join("resources", "icons", f"{name}.svg")
 
         self.lan_btn = QPushButton("Ajout LAN")
@@ -38,18 +50,27 @@ class MikrotikTab(QWidget):
         self.port_btn = QPushButton("Redirection de Port")
         self.port_btn.setIcon(QIcon(icon_path("nat")))
 
-        # Utiliser QSS global, retirer les styles inline
         for btn in [self.lan_btn, self.port_btn]:
             btn.setCursor(Qt.CursorShape.PointingHandCursor)
             btn_layout.addWidget(btn)
+
+        self.layout.addLayout(btn_layout)
 
         # Connexions
         self.lan_btn.clicked.connect(self.add_lan)
         self.port_btn.clicked.connect(self.add_port_forward)
 
+    def append_terminal(self, text):
+        """Ajoute du texte dans le terminal et scroll automatique"""
+        self.terminal.appendPlainText(text)
+        scrollbar = self.terminal.verticalScrollBar()
+        scrollbar.setValue(scrollbar.maximum())
+
     def insert_config(self, config_text: str):
-        """Insère un bloc dans le terminal."""
-        self.terminal.appendPlainText(config_text)
+        """Insertion via thread pour effet console"""
+        self.thread = MikrotikWorker(config_text)
+        self.thread.output.connect(self.append_terminal)
+        self.thread.start()
 
     # --- Popups ---
     def add_lan(self):
