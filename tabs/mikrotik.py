@@ -47,10 +47,14 @@ class MikrotikTab(QWidget):
 
         self.lan_btn = QPushButton("Ajout LAN")
         self.lan_btn.setIcon(QIcon(icon_path("network")))
+
         self.port_btn = QPushButton("Redirection de Port")
         self.port_btn.setIcon(QIcon(icon_path("nat")))
 
-        for btn in [self.lan_btn, self.port_btn]:
+        self.router_ip_btn = QPushButton("Ajout Port IP Router")
+        self.router_ip_btn.setIcon(QIcon(icon_path("router")))
+
+        for btn in [self.lan_btn, self.port_btn, self.router_ip_btn]:
             btn.setCursor(Qt.CursorShape.PointingHandCursor)
             btn_layout.addWidget(btn)
 
@@ -59,6 +63,7 @@ class MikrotikTab(QWidget):
         # Connexions
         self.lan_btn.clicked.connect(self.add_lan)
         self.port_btn.clicked.connect(self.add_port_forward)
+        self.router_ip_btn.clicked.connect(self.add_port_ip_router)
 
     def append_terminal(self, text):
         """Ajoute du texte dans le terminal et scroll automatique"""
@@ -134,5 +139,31 @@ class MikrotikTab(QWidget):
                 proto_input.text(),
                 wan_ip_input.text(),
                 wan_port_input.text(),
+            )
+            self.insert_config(config)
+
+    def add_port_ip_router(self):
+        dialog = QDialog(self)
+        dialog.setWindowTitle("Ajouter un Port IP Router")
+        layout = QFormLayout(dialog)
+
+        ip_route_input = QLineEdit()
+        ip_nat_input = QLineEdit()
+        port_eth_input = QLineEdit()
+
+        layout.addRow("Adresse IP Routée:", ip_route_input)
+        layout.addRow("Adresse IP NAT:", ip_nat_input)
+        layout.addRow("Port Ethernet:", port_eth_input)
+
+        buttons = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel)
+        layout.addWidget(buttons)
+        buttons.accepted.connect(dialog.accept)
+        buttons.rejected.connect(dialog.reject)
+
+        if dialog.exec() == QDialog.DialogCode.Accepted:
+            config = core_mikrotik.ajout_port_ip_router(
+                ip_route_input.text(),
+                ip_nat_input.text(),
+                port_eth_input.text(),
             )
             self.insert_config(config)

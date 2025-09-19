@@ -20,7 +20,7 @@ class CommitsThread(QThread):
             url = "https://api.github.com/repos/T4nguy01/Multitool/commits"
             response = requests.get(url)
             if response.status_code == 200:
-                commits = response.json()[:5]  # 5 derniers commits
+                commits = response.json()[:3]  # 3 derniers commits
                 self.commits_loaded.emit(commits)
             else:
                 self.commits_loaded.emit([])
