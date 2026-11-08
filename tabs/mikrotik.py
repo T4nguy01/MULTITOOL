@@ -1,7 +1,7 @@
 from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QPushButton,
     QPlainTextEdit, QDialog, QLineEdit, QFormLayout,
-    QDialogButtonBox
+    QDialogButtonBox, QMessageBox
 )
 from PyQt6.QtGui import QFont, QIcon
 from PyQt6.QtCore import Qt, QThread, pyqtSignal
@@ -71,6 +71,13 @@ class MikrotikTab(QWidget):
         scrollbar = self.terminal.verticalScrollBar()
         scrollbar.setValue(scrollbar.maximum())
 
+    def generate(self, builder, *args):
+        """Appelle un générateur du core ; affiche l'erreur de validation si besoin."""
+        try:
+            self.insert_config(builder(*args))
+        except ValueError as e:
+            QMessageBox.warning(self, "Saisie invalide", str(e))
+
     def insert_config(self, config_text: str):
         """Insertion via thread pour effet console"""
         self.thread = MikrotikWorker(config_text)
@@ -101,14 +108,14 @@ class MikrotikTab(QWidget):
         buttons.rejected.connect(dialog.reject)
 
         if dialog.exec() == QDialog.DialogCode.Accepted:
-            config = core_mikrotik.lan_block(
+            self.generate(
+                core_mikrotik.lan_block,
                 iface_input.text(),
                 ip_input.text(),
                 mask_input.text(),
                 dhcp_start_input.text(),
                 dhcp_end_input.text(),
             )
-            self.insert_config(config)
 
     def add_port_forward(self):
         dialog = QDialog(self)
@@ -133,14 +140,14 @@ class MikrotikTab(QWidget):
         buttons.rejected.connect(dialog.reject)
 
         if dialog.exec() == QDialog.DialogCode.Accepted:
-            config = core_mikrotik.port_forward_block(
+            self.generate(
+                core_mikrotik.port_forward_block,
                 to_ip_input.text(),
                 lan_port_input.text(),
                 proto_input.text(),
                 wan_ip_input.text(),
                 wan_port_input.text(),
             )
-            self.insert_config(config)
 
     def add_port_ip_router(self):
         dialog = QDialog(self)
@@ -161,9 +168,9 @@ class MikrotikTab(QWidget):
         buttons.rejected.connect(dialog.reject)
 
         if dialog.exec() == QDialog.DialogCode.Accepted:
-            config = core_mikrotik.ajout_port_ip_router(
+            self.generate(
+                core_mikrotik.ajout_port_ip_router,
                 ip_route_input.text(),
                 ip_nat_input.text(),
                 port_eth_input.text(),
             )
-            self.insert_config(config)

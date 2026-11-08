@@ -17,8 +17,8 @@ class CommitsThread(QThread):
 
     def run(self):
         try:
-            url = "https://api.github.com/repos/T4nguy01/Multitool/commits"
-            response = requests.get(url)
+            url = "https://api.github.com/repos/T4nguy01/MULTITOOL/commits"
+            response = requests.get(url, timeout=10)
             if response.status_code == 200:
                 commits = response.json()[:3]  # 3 derniers commits
                 self.commits_loaded.emit(commits)

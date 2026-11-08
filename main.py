@@ -7,7 +7,7 @@ from PyQt6.QtCore import QPropertyAnimation, QEasingCurve
 from PyQt6.QtSvg import QSvgRenderer
 
 import pywinstyles
-from config import APP_NAME, ICON_PATH
+from core.appconfig import APP_NAME, ICON_PATH
 
 # Import des onglets
 from tabs.accueil import AccueilTab

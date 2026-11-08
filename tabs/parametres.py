@@ -35,7 +35,7 @@ class GitUpdateThread(QThread):
             self.progress_updated.emit(75)
             if "Your branch is behind" in result_status.stdout:
                 result_pull = subprocess.run(
-                    ["git", "pull", "origin", "main"],
+                    ["git", "pull", "--ff-only", "origin", "main"],
                     capture_output=True, text=True, timeout=60
                 )
                 self.progress_updated.emit(100)
