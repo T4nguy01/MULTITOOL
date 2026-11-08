@@ -6,8 +6,11 @@ from PyQt6.QtWidgets import QApplication, QMainWindow, QWidget, QHBoxLayout, QVB
 from PyQt6.QtCore import QPropertyAnimation, QEasingCurve
 from PyQt6.QtSvg import QSvgRenderer
 
-import pywinstyles
-from config import APP_NAME, ICON_PATH
+try:
+    import pywinstyles
+except ImportError:
+    pywinstyles = None
+from core.appconfig import APP_NAME, ICON_PATH
 
 # Import des onglets
 from tabs.accueil import AccueilTab
@@ -160,7 +163,8 @@ class MainWindow(QMainWindow):
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    pywinstyles.apply_style(app, style="mica")
+    if pywinstyles:
+        pywinstyles.apply_style(app, style="mica")
 
     # Charger QSS
     qss_path = os.path.join(os.path.dirname(__file__), "resources", "styles", "style.qss")

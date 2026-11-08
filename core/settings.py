@@ -1,4 +1,5 @@
 # core/settings.py
+from core.appconfig import PING_HOSTS
 
 class SETTINGS:
     # Paramètres utilisateurs
@@ -7,12 +8,7 @@ class SETTINGS:
     notifications = True
 
     # Paramètres réseau
-    ping_hosts = [
-        {"name": "Google", "host": "8.8.8.8"},
-        {"name": "OXO", "host": "192.168.1.246"},
-        {"name": "MYOPENIP", "host": "94.143.87.70"},
-        {"name": "CONVERGENCE", "host": "91.211.64.225"}
-    ]
+    ping_hosts = PING_HOSTS  # défini dans config.py (privé)
 
     @classmethod
     def update(cls, theme=None, auto_update=None, notifications=None):

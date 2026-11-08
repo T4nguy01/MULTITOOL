@@ -18,8 +18,17 @@ class GitUpdateThread(QThread):
     update_finished = pyqtSignal(bool, str)
     progress_updated = pyqtSignal(int)
 
+    EXPECTED_REMOTE = "github.com/T4nguy01/MULTITOOL"
+
     def run(self):
         try:
+            remote = subprocess.run(
+                ["git", "remote", "get-url", "origin"],
+                capture_output=True, text=True, timeout=10
+            ).stdout.strip()
+            if self.EXPECTED_REMOTE.lower() not in remote.lower() or not remote.startswith("https://"):
+                self.update_finished.emit(False, f"Dépôt distant non autorisé : {remote!r}")
+                return
             self.progress_updated.emit(25)
             result_fetch = subprocess.run(
                 ["git", "fetch"],
@@ -35,7 +44,7 @@ class GitUpdateThread(QThread):
             self.progress_updated.emit(75)
             if "Your branch is behind" in result_status.stdout:
                 result_pull = subprocess.run(
-                    ["git", "pull", "origin", "main"],
+                    ["git", "pull", "--ff-only", "origin", "main"],
                     capture_output=True, text=True, timeout=60
                 )
                 self.progress_updated.emit(100)

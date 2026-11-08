@@ -140,3 +140,12 @@ Les contributions sont **les bienvenues** 🎉
 Ce projet est sous licence **MIT License** © 2025
 
 ---
+## Installation
+
+1. `pip install -r requirements.txt`
+2. Copier `config.exemple.py` en `config.py` et y mettre la vraie configuration (sans `config.py`, l'app démarre avec des valeurs par défaut).
+3. Lancer `ADMIN.bat` (Windows) ou `python main.py`.
+
+## Tests
+
+`pip install -r requirements-dev.txt && python -m pytest`
