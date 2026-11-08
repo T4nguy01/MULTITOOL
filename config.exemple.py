@@ -13,3 +13,8 @@ MIKROTIK_BASE_CONFIG = """
 /user add name=admin password=changeme group=full
 /ip service set [find] address=192.168.0.0/24
 """
+
+# Hôtes testés par l'onglet Ping
+PING_HOSTS = [
+    {"name": "Google", "host": "8.8.8.8"},
+]

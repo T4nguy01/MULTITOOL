@@ -1,4 +1,5 @@
 @echo off
+:: Lanceur OPTIONNEL : élève toute l'application. Sans besoin d'admin, lancer main.py directement.
 :: Vérifie si on est admin
 NET SESSION >nul 2>&1
 IF %ERRORLEVEL% NEQ 0 (

@@ -5,3 +5,8 @@ except ImportError:
     APP_NAME = "MultiTool"
     ICON_PATH = "resources/icons/icon.ico"
     MIKROTIK_BASE_CONFIG = "# config.py absent : copier config.exemple.py en config.py\n"
+
+try:
+    from config import PING_HOSTS
+except ImportError:
+    PING_HOSTS = [{"name": "Google", "host": "8.8.8.8"}]
